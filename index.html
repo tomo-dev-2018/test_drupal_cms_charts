@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creating Charts in Drupal CMS: A Comprehensive Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF8;
+            color: #383736;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #0C6A63;
+            border-bottom-color: #0C6A63;
+        }
+        .tab-btn {
+            transition: all 0.3s;
+        }
+        .tab-btn.active {
+            background-color: #0C6A63;
+            color: #FDFBF8;
+        }
+        .card {
+            background-color: #FFFFFF;
+            border: 1px solid #EAE8E4;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -4px rgba(0, 0, 0, 0.07);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .status-green { background-color: #10B981; }
+        .status-yellow { background-color: #F59E0B; }
+        .status-blue { background-color: #3B82F6; }
+        .code-block {
+            background-color: #2D2D2D;
+            color: #F8F8F2;
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        .code-comment { color: #75715E; }
+        .code-keyword { color: #F92672; }
+        .code-string { color: #E6DB74; }
+        .code-function { color: #66D9EF; }
+        .code-var { color: #FD971F; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 border-b border-gray-200/80">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-gray-800">Drupal Charts Guide</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#overview" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Overview</a>
+                        <a href="#install" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Installation</a>
+                        <a href="#methods" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Methods</a>
+                        <a href="#troubleshooting" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Troubleshooting</a>
+                        <a href="#takeaways" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Key Takeaways</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+        <section id="overview" class="mb-24 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Visualize Your Data with Drupal Charts</h2>
+            <p class="text-lg text-gray-600 mb-8">
+                The Drupal Charts module provides powerful visualization capabilities for your Drupal site. With support for multiple charting libraries and flexible implementation options, you can transform raw data into compelling visual stories. This guide walks you through everything you need to know to create beautiful, interactive charts in Drupal.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <div class="card p-6 flex flex-col justify-between">
+                    <h3 class="font-bold text-lg mb-2 text-teal-800">Flexible Options</h3>
+                    <p class="text-3xl font-bold">3 Methods</p>
+                    <p class="text-sm text-gray-500 mt-2">Blocks, Views, and Fields for different implementation needs.</p>
+                </div>
+                <div class="card p-6 flex flex-col justify-between">
+                    <h3 class="font-bold text-lg mb-2 text-teal-800">Library Support</h3>
+                    <p class="text-3xl font-bold">4+ Libraries</p>
+                    <p class="text-sm text-gray-500 mt-2">ApexCharts, Billboard.js, Google Charts and more.</p>
+                </div>
+                <div class="card p-6 flex flex-col justify-between">
+                    <h3 class="font-bold text-lg mb-2 text-teal-800">Implementation</h3>
+                    <p class="text-3xl font-bold">5 Steps</p>
+                    <p class="text-sm text-gray-500 mt-2">From installation to troubleshooting in one guide.</p>
+                </div>
+            </div>
+
+            <div class="card p-6">
+                 <h3 class="text-xl font-bold text-gray-900 mb-4 text-center">Method Comparison: Flexibility vs. Complexity</h3>
+                 <p class="text-center text-gray-600 mb-6">Each charting method offers different advantages depending on your needs and technical expertise.</p>
+                 <div class="chart-container h-64 md:h-80">
+                    <canvas id="methodComparisonChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="install" class="mb-24 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Installation & Configuration</h2>
+            <p class="text-lg text-gray-600 mb-8">
+                Getting started with the Charts module requires proper installation and configuration. Follow these steps carefully to set up your Drupal site for charting success.
+            </p>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                <div class="lg:col-span-3 card p-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">Step 1: Install Required Modules</h3>
+                    <div class="code-block mb-4">
+                        <span class="code-comment"># Install core Charts module and submodules</span><br>
+                        <span class="code-function">composer</span> <span class="code-keyword">require</span> <span class="code-string">drupal/charts drupal/charts_block drupal/charts_views drupal/charts_api_example</span><br><br>
+                        
+                        <span class="code-comment"># Install charting libraries (choose one or more)</span><br>
+                        <span class="code-function">composer</span> <span class="code-keyword">require</span> <span class="code-string">drupal/apexcharts</span>    <span class="code-comment"># Apex Charts</span><br>
+                        <span class="code-function">composer</span> <span class="code-keyword">require</span> <span class="code-string">drupal/charts_billboard</span>  <span class="code-comment"># Billboard.js (with D3.js)</span><br>
+                        <span class="code-function">composer</span> <span class="code-keyword">require</span> <span class="code-string">drupal/charts_google</span>  <span class="code-comment"># Google Charts (CDN-based)</span>
+                    </div>
+                    
+                    <h3 class="text-xl font-bold text-gray-900 mb-4 mt-6">Step 2: Configure Composer (Critical!)</h3>
+                    <p class="text-gray-600 mb-4">Add these to your <code>composer.json</code> before installing libraries:</p>
+                    <div class="code-block">
+                        {<br>
+                        &nbsp;&nbsp;<span class="code-string">"repositories"</span>: [<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;{<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-string">"type"</span>: <span class="code-string">"composer"</span>,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-string">"url"</span>: <span class="code-string">"https://packages.drupal.org/8"</span><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;},<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;{<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-string">"type"</span>: <span class="code-string">"package"</span>,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-string">"package"</span>: {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-string">"name"</span>: <span class="code-string">"d3/d3"</span>,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-string">"version"</span>: <span class="code-string">"7.8.5"</span>,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-string">"type"</span>: <span class="code-string">"drupal-library"</span>,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-string">"dist"</span>: {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-string">"url"</span>: <span class="code-string">"https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js"</span>,<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-string">"type"</span>: <span class="code-string">"file"</span><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                        &nbsp;&nbsp;],<br>
+                        &nbsp;&nbsp;<span class="code-string">"extra"</span>: {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-string">"installer-paths"</span>: {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-string">"web/libraries/{$name}"</span>: [<span class="code-string">"type:drupal-library"</span>]<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                        &nbsp;&nbsp;}<br>
+                        }
+                    </div>
+                    <p class="text-gray-600 mt-4">Run <code>composer update</code> after editing.</p>
+                </div>
+                
+                <div class="lg:col-span-2 space-y-8">
+                    <div class="card p-6">
+                         <h3 class="text-xl font-bold text-gray-900 mb-4">Step 3: Enable Modules</h3>
+                         <p class="text-gray-600 mb-4">Go to <strong>Extend</strong> (<code>/admin/modules</code>) and enable:</p>
+                         <ul class="list-disc pl-5 space-y-2 text-gray-600">
+                            <li><strong>Charts</strong>, <strong>Charts Block</strong>, <strong>Charts Views</strong></li>
+                            <li>Your chosen library (e.g., ApexCharts, Billboard.js)</li>
+                            <li>Optional: <strong>Charts API Example</strong> (for code samples)</li>
+                         </ul>
+                    </div>
+                    
+                    <div class="card p-6">
+                         <h3 class="text-xl font-bold text-gray-900 mb-4">Step 4: Basic Configuration</h3>
+                         <p class="text-gray-600 mb-4">Configure the default settings for your charts:</p>
+                         <ul class="list-disc pl-5 space-y-2 text-gray-600">
+                            <li>Go to <strong>Configuration > Charts settings</strong> (<code>/admin/config/content/charts</code>)</li>
+                            <li>Select a default charting library (e.g., ApexCharts)</li>
+                            <li>Set default colors, styles and chart options</li>
+                            <li>Save configuration</li>
+                         </ul>
+                    </div>
+                    
+                    <div class="card p-6 bg-teal-50 border-teal-200">
+                        <h3 class="text-xl font-bold text-teal-900 mb-2">Pro Tip: Library Comparison</h3>
+                        <p class="text-teal-800">
+                            Choose your charting library based on your needs: 
+                            <span class="font-bold">ApexCharts</span> for beautiful visuals, 
+                            <span class="font-bold">Billboard.js</span> for D3.js integration, 
+                            <span class="font-bold">Google Charts</span> for simplicity and CDN-based loading.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="methods" class="mb-24 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Chart Creation Methods</h2>
+            <p class="text-lg text-gray-600 mb-8">
+                Drupal offers three flexible approaches to create charts, each suited for different use cases. Explore each method below to determine which works best for your needs.
+            </p>
+            
+            <div class="flex flex-col md:flex-row gap-8">
+                <div class="md:w-1/4">
+                    <div id="methods-tabs" class="flex md:flex-col gap-2">
+                        <button data-tab="block" class="tab-btn w-full text-left p-4 rounded-lg font-semibold active">Via Block</button>
+                        <button data-tab="views" class="tab-btn w-full text-left p-4 rounded-lg font-semibold">Via Views</button>
+                        <button data-tab="field" class="tab-btn w-full text-left p-4 rounded-lg font-semibold">Via Field</button>
+                    </div>
+                </div>
+                
+                <div class="md:w-3/4">
+                    <div id="methods-content" class="card p-6 min-h-[400px]">
+                        <div id="block-content">
+                            <h3 class="text-xl font-bold text-gray-900 mb-4">Creating Charts via Block</h3>
+                            <p class="text-gray-600 mb-4">Ideal for static charts that need to be placed in specific regions of your site.</p>
+                            
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div>
+                                    <h4 class="font-bold mb-3 text-teal-800">Steps:</h4>
+                                    <ol class="list-decimal pl-5 space-y-3 text-gray-600">
+                                        <li>Go to <strong>Structure > Block layout > Custom block library</strong> (<code>/admin/content/block</code>)</li>
+                                        <li>Click "Add custom block" > <strong>Chart block</strong></li>
+                                        <li>Configure the chart:
+                                            <ul class="list-disc pl-5 mt-2">
+                                                <li><strong>Data Entry</strong>: Upload CSV or manually add data</li>
+                                                <li><strong>Chart Type</strong>: Select pie/bar/column</li>
+                                                <li><strong>Labels</strong>: Map CSV columns to labels/data</li>
+                                            </ul>
+                                        </li>
+                                        <li>Preview to verify rendering</li>
+                                        <li>Place the block in a region (e.g., Sidebar)</li>
+                                    </ol>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold mb-3 text-teal-800">Example: Site Analytics</h4>
+                                    <div class="chart-container h-64">
+                                        <canvas id="blockChartExample"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="troubleshooting" class="mb-24 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Troubleshooting Tips</h2>
+            <p class="text-lg text-gray-600 mb-8">
+                Even with proper setup, you might encounter issues. Here are solutions to common problems when working with Drupal Charts.
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="card p-6">
+                    <div class="flex items-center mb-3">
+                        <span class="status-dot status-yellow mr-3"></span>
+                        <h3 class="text-lg font-bold">Library Not Loading?</h3>
+                    </div>
+                    <ul class="list-disc pl-5 space-y-2 text-gray-600">
+                        <li>Disable CSS/JS aggregation at <strong>Configuration > Performance</strong> (<code>/admin/config/development/performance</code>)</li>
+                        <li>Check browser console for 404 errors</li>
+                        <li>Adjust library paths in module <code>.libraries.yml</code> if needed</li>
+                    </ul>
+                </div>
+                
+                <div class="card p-6">
+                    <div class="flex items-center mb-3">
+                        <span class="status-dot status-blue mr-3"></span>
+                        <h3 class="text-lg font-bold">Debugging Charts API</h3>
+                    </div>
+                    <ul class="list-disc pl-5 space-y-2 text-gray-600">
+                        <li>Enable "Display debug data" in <strong>Charts settings</strong></li>
+                        <li>Use <code>charts_api_example</code> module for sample code</li>
+                        <li>Check Drupal logs for errors</li>
+                    </ul>
+                </div>
+                
+                <div class="card p-6">
+                    <div class="flex items-center mb-3">
+                        <span class="status-dot status-green mr-3"></span>
+                        <h3 class="text-lg font-bold">Real-time Data?</h3>
+                    </div>
+                    <ul class="list-disc pl-5 space-y-2 text-gray-600">
+                        <li>Use Views with <code>views_data_source</code> (JSON) for remote data</li>
+                        <li>Avoid Drupal rendering for live data</li>
+                        <li>Call chart libraries directly via JavaScript</li>
+                    </ul>
+                </div>
+                
+                <div class="card p-6 bg-amber-50 border-amber-200 col-span-full">
+                    <h3 class="text-xl font-bold text-amber-900 mb-2">Critical Note</h3>
+                    <p class="text-amber-800">
+                        <span class="font-bold">Always test with aggregation disabled during development!</span> 
+                        Many chart rendering issues are caused by aggregated CSS/JS files. Disable aggregation while developing your charts and re-enable it for production.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="takeaways" class="scroll-mt-20">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Key Takeaways</h2>
+            <p class="text-lg text-gray-600 mb-8">
+                The Drupal Charts module offers powerful visualization capabilities. Here are the most important things to remember when implementing charts on your Drupal site.
+            </p>
+            
+            <div class="relative">
+                <div class="border-l-2 border-teal-700/50 absolute h-full top-0 left-4"></div>
+                <div class="space-y-12">
+                    <div class="relative pl-12">
+                        <div class="absolute top-1 left-0 flex items-center justify-center bg-teal-600 rounded-full w-8 h-8 text-white font-bold">1</div>
+                        <h3 class="text-xl font-bold text-gray-800">Naming Matters</h3>
+                        <p class="text-gray-600">Modules like <code>charts</code> are easy to discover and remember. Choose clear, descriptive names for your chart blocks and views.</p>
+                    </div>
+                    
+                    <div class="relative pl-12">
+                        <div class="absolute top-1 left-0 flex items-center justify-center bg-teal-600 rounded-full w-8 h-8 text-white font-bold">2</div>
+                        <h3 class="text-xl font-bold text-gray-800">Flexibility</h3>
+                        <p class="text-gray-600">Supports blocks, views, fields, and custom code. Use the method that best fits your content strategy and technical requirements.</p>
+                    </div>
+                    
+                    <div class="relative pl-12">
+                        <div class="absolute top-1 left-0 flex items-center justify-center bg-teal-600 rounded-full w-8 h-8 text-white font-bold">3</div>
+                        <h3 class="text-xl font-bold text-gray-800">Library Agnostic</h3>
+                        <p class="text-gray-600">Swap Apex/Billboard/Google Charts without changing config. This future-proofs your implementation as charting libraries evolve.</p>
+                    </div>
+                    
+                    <div class="relative pl-12">
+                        <div class="absolute top-1 left-0 flex items-center justify-center bg-teal-600 rounded-full w-8 h-8 text-white font-bold">4</div>
+                        <h3 class="text-xl font-bold text-gray-800">Pro Tips</h3>
+                        <p class="text-gray-600">
+                            - Use <code>ddev</code> for local development to simplify dependency management<br>
+                            - Combine with <strong>Dashboard module</strong> for admin analytics<br>
+                            - For e-commerce: Create views of Drupal Commerce orders/products
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 mt-16">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-500">
+            <p>Interactive Guide to Creating Charts in Drupal CMS.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Method comparison chart
+            const methodCtx = document.getElementById('methodComparisonChart').getContext('2d');
+            new Chart(methodCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Ease of Use', 'Flexibility', 'Customization', 'Dynamic Data', 'Complexity'],
+                    datasets: [
+                        {
+                            label: 'Block Method',
+                            data: [9, 6, 7, 3, 4],
+                            fill: true,
+                            backgroundColor: 'rgba(12, 106, 99, 0.2)',
+                            borderColor: 'rgb(12, 106, 99)',
+                            pointBackgroundColor: 'rgb(12, 106, 99)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgb(12, 106, 99)'
+                        },
+                        {
+                            label: 'Views Method',
+                            data: [7, 9, 8, 9, 7],
+                            fill: true,
+                            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                            borderColor: 'rgb(59, 130, 246)',
+                            pointBackgroundColor: 'rgb(59, 130, 246)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgb(59, 130, 246)'
+                        },
+                        {
+                            label: 'Field Method',
+                            data: [8, 7, 8, 5, 6],
+                            fill: true,
+                            backgroundColor: 'rgba(245, 158, 11, 0.2)',
+                            borderColor: 'rgb(245, 158, 11)',
+                            pointBackgroundColor: 'rgb(245, 158, 11)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgb(245, 158, 11)'
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 10
+                        }
+                    }
+                }
+            });
+            
+            // Block chart example
+            const blockCtx = document.getElementById('blockChartExample').getContext('2d');
+            new Chart(blockCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Organic Search', 'Direct Traffic', 'Social Media', 'Email Campaigns', 'Referrals'],
+                    datasets: [{
+                        label: 'Traffic Sources',
+                        data: [45, 25, 15, 10, 5],
+                        backgroundColor: [
+                            'rgba(12, 106, 99, 0.8)',
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(245, 158, 11, 0.8)',
+                            'rgba(156, 163, 175, 0.8)',
+                            'rgba(139, 92, 246, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(12, 106, 99, 1)',
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(245, 158, 11, 1)',
+                            'rgba(156, 163, 175, 1)',
+                            'rgba(139, 92, 246, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Website Traffic Sources'
+                        }
+                    }
+                }
+            });
+            
+            // Setup methods tabs
+            const methodTabs = document.querySelectorAll('#methods-tabs .tab-btn');
+            const methodsContent = document.getElementById('methods-content');
+            
+            const viewsContent = `
+                <div id="views-content">
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">Creating Charts via Views</h3>
+                    <p class="text-gray-600 mb-4">Perfect for dynamic charts based on your site's content.</p>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-bold mb-3 text-teal-800">Steps:</h4>
+                            <ol class="list-decimal pl-5 space-y-3 text-gray-600">
+                                <li>Create a new View: <strong>Structure > Views > Add view</strong> (<code>/admin/structure/views/add</code>)</li>
+                                <li>Select entity (e.g., Content, Taxonomy)</li>
+                                <li>Configure aggregation:
+                                    <ul class="list-disc pl-5 mt-2">
+                                        <li>Under <strong>Advanced > Aggregation</strong>: Enable</li>
+                                        <li>For count-based charts: Add a field (e.g., Content ID) > Set aggregation to <strong>Count distinct</strong></li>
+                                    </ul>
+                                </li>
+                                <li>Set chart format:
+                                    <ul class="list-disc pl-5 mt-2">
+                                        <li><strong>Format > Show</strong>: Select "Chart"</li>
+                                        <li>Choose chart type (e.g., Pie)</li>
+                                        <li>Map fields: <strong>Label Field</strong> (e.g., Taxonomy term name), <strong>Data Field</strong> (Aggregated count field)</li>
+                                    </ul>
+                                </li>
+                                <li>Place the View as a block or page</li>
+                            </ol>
+                        </div>
+                        <div>
+                            <h4 class="font-bold mb-3 text-teal-800">Example: Content by Type</h4>
+                            <div class="chart-container h-64">
+                                <canvas id="viewsChartExample"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const fieldContent = `
+                <div id="field-content">
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">Creating Charts via Field</h3>
+                    <p class="text-gray-600 mb-4">Best for content-specific charts that belong with individual content items.</p>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-bold mb-3 text-teal-800">Steps:</h4>
+                            <ol class="list-decimal pl-5 space-y-3 text-gray-600">
+                                <li>Add a chart field to a content type: <strong>Structure > Content types > Manage fields</strong> (e.g., <code>/admin/structure/types/manage/page/fields</code>)</li>
+                                <li>Add field: <strong>Type</strong> = "Chart"</li>
+                                <li>Configure field settings:
+                                    <ul class="list-disc pl-5 mt-2">
+                                        <li>Same UI as Chart Block (CSV upload/manual data)</li>
+                                        <li>Set default chart type</li>
+                                    </ul>
+                                </li>
+                                <li>When creating content, populate chart data in the field</li>
+                                <li>Displays as embedded chart on node view</li>
+                            </ol>
+                        </div>
+                        <div>
+                            <h4 class="font-bold mb-3 text-teal-800">Example: Project Timeline</h4>
+                            <div class="chart-container h-64">
+                                <canvas id="fieldChartExample"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Views chart example
+            setTimeout(() => {
+                if (document.getElementById('viewsChartExample')) {
+                    const viewsCtx = document.getElementById('viewsChartExample').getContext('2d');
+                    new Chart(viewsCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Article', 'Blog Post', 'Event', 'Page', 'Product'],
+                            datasets: [{
+                                label: 'Content Count',
+                                data: [120, 85, 42, 210, 65],
+                                backgroundColor: 'rgba(12, 106, 99, 0.8)',
+                                borderColor: 'rgba(12, 106, 99, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                // Field chart example
+                if (document.getElementById('fieldChartExample')) {
+                    const fieldCtx = document.getElementById('fieldChartExample').getContext('2d');
+                    new Chart(fieldCtx, {
+                        type: 'line',
+                        data: {
+                            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                            datasets: [{
+                                label: 'Project Progress',
+                                data: [15, 30, 45, 65, 80, 95],
+                                fill: false,
+                                borderColor: 'rgb(12, 106, 99)',
+                                tension: 0.1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 100
+                                }
+                            }
+                        }
+                    });
+                }
+            }, 100);
+            
+            methodTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    methodTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    switch(tab.getAttribute('data-tab')) {
+                        case 'block':
+                            methodsContent.innerHTML = document.getElementById('block-content').outerHTML;
+                            break;
+                        case 'views':
+                            methodsContent.innerHTML = viewsContent;
+                            // Render chart after a small delay to allow DOM update
+                            setTimeout(() => {
+                                const viewsCtx = document.getElementById('viewsChartExample').getContext('2d');
+                                new Chart(viewsCtx, {
+                                    type: 'bar',
+                                    data: {
+                                        labels: ['Article', 'Blog Post', 'Event', 'Page', 'Product'],
+                                        datasets: [{
+                                            label: 'Content Count',
+                                            data: [120, 85, 42, 210, 65],
+                                            backgroundColor: 'rgba(12, 106, 99, 0.8)',
+                                            borderColor: 'rgba(12, 106, 99, 1)',
+                                            borderWidth: 1
+                                        }]
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        scales: {
+                                            y: {
+                                                beginAtZero: true
+                                            }
+                                        }
+                                    }
+                                });
+                            }, 50);
+                            break;
+                        case 'field':
+                            methodsContent.innerHTML = fieldContent;
+                            setTimeout(() => {
+                                const fieldCtx = document.getElementById('fieldChartExample').getContext('2d');
+                                new Chart(fieldCtx, {
+                                    type: 'line',
+                                    data: {
+                                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                                        datasets: [{
+                                            label: 'Project Progress',
+                                            data: [15, 30, 45, 65, 80, 95],
+                                            fill: false,
+                                            borderColor: 'rgb(12, 106, 99)',
+                                            tension: 0.1
+                                        }]
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        scales: {
+                                            y: {
+                                                beginAtZero: true,
+                                                max: 100
+                                            }
+                                        }
+                                    }
+                                });
+                            }, 50);
+                            break;
+                    }
+                });
+            });
+            
+            // Setup nav scroll
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.toggle('active', link.getAttribute('href').substring(1) === entry.target.id);
+                        });
+                    }
+                });
+            }, { rootMargin: '-50% 0px -50% 0px', threshold: 0 });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+</body>
+</html>
